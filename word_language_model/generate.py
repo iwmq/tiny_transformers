@@ -12,7 +12,7 @@ from model import PositionalEncoding, RNNModel, TransformerModel
 
 parser = argparse.ArgumentParser(description='PyTorch Wikitext-2 Language Model')
 # Model parameters.
-parser.add_argument('--data', type=str, default='./data/wikitext-2',
+parser.add_argument('--data', type=str, default='../data/wikitext-2',
                     help='location of the data corpus')
 parser.add_argument('--checkpoint', type=str, default='./model.pt',
                     help='model checkpoint to use')
