@@ -59,3 +59,9 @@ Thumbs.db
 *.local
 
 .python-version
+
+# Model weights
+model.pt
+
+# Generated files
+generated.txt
