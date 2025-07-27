@@ -330,7 +330,7 @@ def main():
     if args.report_dir != '' and not os.path.exists(args.report_dir):
         # Save the training report.
         os.makedirs(args.report_dir)
-        report_fpath = os.path.join(args.report_dir, 'reports.json')
+        report_fpath = os.path.join(args.report_dir, 'report.json')
         reports = {
             'start_time': train_start_time,
             'end_time': time.time(),
