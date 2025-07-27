@@ -177,8 +177,11 @@ def evaluate(data_source):
 lr = args.lr
 epoch = 0
 
+
 def train():
     # Turn on training mode which enables dropout.
+    global model
+
     model.train()
     total_loss = 0.
     start_time = time.time()
@@ -232,8 +235,9 @@ best_val_loss = None
 
 def main():
     global best_val_loss
-    global lr
     global epoch
+    global model
+    global lr
     # Loop over epochs.
 
     # At any point you can hit Ctrl + C to break out of training early.
