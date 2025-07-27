@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import math
+import json
 import os
 import time
 
@@ -54,6 +55,8 @@ def get_args():
                         help='the number of heads in the encoder/decoder of the transformer model')
     parser.add_argument('--dry-run', action='store_true',
                         help='verify the code and the model')
+    parser.add_argument('--report-dir', type=str, default='',
+                        help='save training reports to this directory')
     args = parser.parse_args()
     return args
 
@@ -240,16 +243,31 @@ def main():
     global lr
     # Loop over epochs.
 
+    # Record val loss along with each epoch.
+    loss_records = []
+
     # At any point you can hit Ctrl + C to break out of training early.
     try:
+        train_start_time = time.time()
         for epoch in range(1, args.epochs+1):
             epoch_start_time = time.time()
             train()
             val_loss = evaluate(val_data)
+
+            now = time.time()
+            ppl = math.exp(val_loss)
+            loss_records.append({
+                'epoch': epoch,
+                'time': now - train_start_time,
+                'lr': lr,
+                'val_loss': val_loss,
+                'ppl': ppl,
+            })
+
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
-                    'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                            val_loss, math.exp(val_loss)))
+                    'valid ppl {:8.2f}'.format(epoch, (now - epoch_start_time),
+                                            val_loss, ppl))
             print('-' * 89)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < best_val_loss:
@@ -308,6 +326,20 @@ def main():
     if len(args.onnx_export) > 0:
         # Export the model in ONNX format.
         export_onnx(args.onnx_export, batch_size=1, seq_len=args.bptt)
+
+    if args.report_dir != '' and not os.path.exists(args.report_dir):
+        # Save the training report.
+        os.makedirs(args.report_dir)
+        report_fpath = os.path.join(args.report_dir, 'reports.json')
+        reports = {
+            'start_time': train_start_time,
+            'end_time': time.time(),
+            'args': vars(args),
+            'records': loss_records
+        }
+        with open(report_fpath, 'w') as f:
+            json.dump(reports, f, indent=4)
+        print(f'Training report saved to {report_fpath}')
 
 
 if __name__ == '__main__':
